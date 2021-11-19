@@ -1,0 +1,73 @@
+Entities
+  Contracts
+    IEntity{ id: string }
+    IUser extend IEntity
+
+  User extend IUser
+
+UseCases
+  Contracts
+    Commons
+      Data extend Entities/Contracts/Commons/IEntity
+
+      Input() extend Data
+        handle(): Data
+
+      Output()
+        handle(): Data
+      
+      Repository
+        handle(Data?): null | Data | Data[]
+
+      UseCase()
+        handle(Input): Output
+
+    User
+      Inpput() extend UseCases/Contracts/Commons/Input
+        handle(): Entities/Contracts/User
+
+      Output() extend UseCases/Contracts/Commons/Output
+        handle(): Entities/Contracts/User
+
+      NotificationService
+        handle(User): void
+
+      RepositoryCreate extend UseCases/Contracts/Commons/Repository
+        handle(User): User | null
+
+      UseCaseCreate(Repository) extend UseCases/Contracts/Commons/UseCase
+        handle(Inpput): Output
+
+      UseCaseSendNotification(NotificationService) extend UseCases/Contracts/Commons/UseCase
+        handle(Inpput): Output
+
+  User
+    Output extend UseCases/Contracts/User/Output
+      handle(User): User
+    UseCaseCreate(Repository, NotificationService) extend UseCases/Contracts/User/UseCaseCreate
+      handle(Input): Output
+
+Controllers
+  Web
+    Contracts
+      HttpResponseData{ status: number, data: any }
+
+      HttpResponse()
+        handle(status: number, Output): HttpResponseData
+    
+    User
+      OutputHttp extend UseCases/Contracts/User/Output
+        handle(): any
+
+      Controller(registration: UseCases/User/UseCaseRegistration)
+        handle()
+          UserOutput = registration.handle(UserInput)
+            
+Frameworks & Drives
+  UseRepositoryMySql: UseRepository
+  NotificationServiceEmail: NotificationService
+
+Main
+  webAdapter = AdapterWeb(DbUseCaseRegistration(UseRepositoryMySql, NotificationServiceEmail))
+  UserPresenterJson(webAdapter) -> world
+

@@ -1,5 +1,5 @@
-import { IUser } from "@/domain/contracts/entities/IUser";
+import IUser from "@/domain/entities/contracts/IUser";
 
 export class User implements IUser {
-  constructor(readonly name: string, readonly email: string) {}
+  constructor(readonly id: string | null, readonly name: string) {}
 }
