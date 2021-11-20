@@ -1,5 +1,5 @@
-import IData from "@/domain/useCases/contracts/commons/IData";
+import IEntity from "@/domain/entities/contracts/IEntity";
 
-export default interface IInput extends IData {
-  handle(): Promise<IData>;
+export default interface IInput {
+  handle(): Promise<IEntity>;
 }

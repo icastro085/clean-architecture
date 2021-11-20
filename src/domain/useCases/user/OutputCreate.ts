@@ -1,15 +1,14 @@
-import IUser from "@/domain/entities/contracts/IUser";
+import IEntity from "@/domain/useCases/contracts/user/IEntity";
+import IData from "@/domain/useCases/contracts/user/IData";
 import IOutput from "@/domain/useCases/contracts/user/IOutput";
 
 export default class OutputCreate implements IOutput {
-  constructor(readonly user: IUser | null) {}
-
-  handle(): Promise<IUser | null> {
-    if (!this.user) {
+  handle(user: IEntity | null): Promise<IData> {
+    if (!user) {
       return Promise.resolve(null);
     }
 
-    const { id = null, name = "" } = this.user;
+    const { id = null, name = "" } = user;
     return Promise.resolve({ id, name });
   }
 }

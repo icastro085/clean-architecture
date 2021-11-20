@@ -1,5 +1,5 @@
-import IUser from "@/domain/entities/contracts/IUser";
+import IEntity from "@/domain/useCases/contracts/user/IEntity";
 
 export default interface INotificationService {
-  handle(user: IUser): void;
+  handle(user: IEntity): void;
 }

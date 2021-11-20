@@ -1,67 +1,105 @@
 Entities
   Contracts
-    IEntity{ id: string }
-    IUser extend IEntity
-
-  User extend IUser
+    IEntity{ id?: string }
+    IUser{ name: string } extend IEntity
 
 UseCases
   Contracts
     Commons
-      Data extend Entities/Contracts/Commons/IEntity
+      (IEntity from Entities/Contracts/IEntity)
+      IData() extend IEntity
 
-      Input() extend Data
-        handle(): Data
+      (IEntity from Entities/Contracts/IEntity)
+      IInput()
+        handle(): IEntity
 
-      Output()
-        handle(): Data
+      (IEntity from Entities/Contracts/IEntity)
+      IOutput()
+        handle(IEntity): null | Data | Data[]
       
-      Repository
-        handle(Data?): null | Data | Data[]
+      (IEntity from Entities/Contracts/IEntity)
+      IRepository()
+        handle(IEntity?): null | IEntity | IEntity[]
 
-      UseCase()
-        handle(Input): Output
+      IUseCase()
+        handle(IInput): null | IData | IData[]
 
     User
-      Inpput() extend UseCases/Contracts/Commons/Input
-        handle(): Entities/Contracts/User
+      (IUser from Entities/Contracts/IUser)
+      IEntity() extend IUser
 
-      Output() extend UseCases/Contracts/Commons/Output
-        handle(): Entities/Contracts/User
+      (ICommonsData from UseCases/Contracts/Commons/IData)
+      IData() extend ICommonsData | null
 
-      NotificationService
-        handle(User): void
+      (ICommonsInput from UseCases/Contracts/Commons/IInput)
+      IInpput() extend ICommonsInput
+        handle(): IEntity
 
-      RepositoryCreate extend UseCases/Contracts/Commons/Repository
-        handle(User): User | null
+      (ICommonsOutput from UseCases/Contracts/Commons/IOutput)
+      IOutput() extend ICommonsOutput
+        handle(): IData
 
-      UseCaseCreate(Repository) extend UseCases/Contracts/Commons/UseCase
-        handle(Inpput): Output
+      INotificationService
+        handle(IEntity): void
 
-      UseCaseSendNotification(NotificationService) extend UseCases/Contracts/Commons/UseCase
-        handle(Inpput): Output
+      (ICommonsRepository from UseCases/Contracts/Commons/IRepository)
+      IRepositoryCreate extend ICommonsRepository
+        handle(IEntity): IEntity | null
+
+      (ICommonsUseCase from UseCases/Contracts/Commons/UseCase)
+      IUseCaseCreate(IOutput, IRepositoryCreate) extend ICommonsUseCase
+        handle(IInpput): IData | null
+
+      (ICommonsUseCase from UseCases/Contracts/Commons/UseCase)
+      IUseCaseSendNotification(INotificationService) extend ICommonsUseCase
+        handle(IInpput): void
 
   User
-    Output extend UseCases/Contracts/User/Output
-      handle(User): User
-    UseCaseCreate(Repository, NotificationService) extend UseCases/Contracts/User/UseCaseCreate
-      handle(Input): Output
+    (
+      Input from UseCases/Contracts/User/Input
+      Entity from UseCases/Contracts/User/Entity
+    )
+    InputCreate(Entity) extend Input
+      handle(): Entity
+
+    (
+      Input from UseCases/Contracts/User/Output
+      Entity from UseCases/Contracts/User/Entity
+      Data from UseCases/Contracts/User/Data
+    )
+    OutputCreate(Entity) extend Output
+      handle(): Data | null
+
+    (
+      RepositoryCreate from UseCases/Contracts/User/RepositoryCreate
+      IUseCaseCreate from UseCases/Contracts/User/UseCaseCreate
+      Data from UseCases/Contracts/User/Data
+    )
+    UseCaseCreate(OutputCreate, RepositoryCreate) extend IUseCaseCreate
+      handle(UseCases/Contracts/User/Input): Data | null
 
 Controllers
   Web
     Contracts
-      HttpResponseData{ status: number, data: any }
+      HttpData extend UseCases/Contracts/Commons/Data
+
+      HttpOutput
+        handle(): { status: number, data: null | HttpData | HttpData[] }
 
       HttpResponse()
-        handle(status: number, Output): HttpResponseData
+        handle(HttpData): HttpOutput
     
     User
-      OutputHttp extend UseCases/Contracts/User/Output
+      HttpData(UseCases/Contracts/Commons/Data) extend Controllers/Web/Contracts/HttpData
+
+      HttpOutput(UseCases/Contracts/Commons/Output) extend Controllers/Web/Contracts/HttpOutput
         handle(): any
 
-      Controller(registration: UseCases/User/UseCaseRegistration)
-        handle()
-          UserOutput = registration.handle(UserInput)
+      Controller(
+        UseCases/Contracts/User/UseCaseCreate,
+
+      )
+        handle(): HttpOutput
             
 Frameworks & Drives
   UseRepositoryMySql: UseRepository

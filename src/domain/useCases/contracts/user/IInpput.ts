@@ -1,6 +1,6 @@
-import IUser from "@/domain/entities/contracts/IUser";
-import IInputCommon from "@/domain/useCases/contracts/commons/IInput";
+import IEntity from "@/domain/useCases/contracts/user/IEntity";
+import ICommonsInput from "@/domain/useCases/contracts/commons/IInput";
 
-export default interface IInpput extends IInputCommon {
-  handle(): Promise<IUser>;
+export default interface IInpput extends ICommonsInput {
+  handle(): Promise<IEntity>;
 }

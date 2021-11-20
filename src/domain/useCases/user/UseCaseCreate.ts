@@ -1,18 +1,20 @@
-import IUser from "@/domain/entities/contracts/IUser";
+import IEntity from "@/domain/useCases/contracts/user/IEntity";
+import IData from "@/domain/useCases/contracts/user/IData";
 import IRepositoryCreate from "@/domain/useCases/contracts/user/IRepositoryCreate";
 import IUseCaseCreate from "@/domain/useCases/contracts/user/IUseCaseCreate";
 import IInpput from "@/domain/useCases/contracts/user/IInpput";
-import OutputCreate from "@/domain/useCases/user/OutputCreate";
+import IOutput from "@/domain/useCases/contracts/user/IOutput";
 
 export default class UseCaseCreate implements IUseCaseCreate {
-  constructor(readonly repository: IRepositoryCreate) {}
+  constructor(
+    readonly output: IOutput,
+    readonly repository: IRepositoryCreate,
+  ) {}
 
-  async handle(input: IInpput): Promise<OutputCreate> {
-    const userInput: IUser = await input.handle();
-    const userOutput: IUser = await this.repository.handle(userInput);
-
-    const output: OutputCreate = new OutputCreate(userOutput);
-
-    return output;
+  async handle(input: IInpput): Promise<IData | null> {
+    const userInput: IEntity = await input.handle();
+    const userOutput: IEntity | null = await this.repository.handle(userInput);
+    const outputData: IData = await this.output.handle(userOutput);
+    return outputData;
   }
 }

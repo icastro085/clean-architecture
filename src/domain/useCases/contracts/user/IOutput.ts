@@ -1,7 +1,7 @@
-import IUser from "@/domain/entities/contracts/IUser";
-import IData from "@/domain/useCases/contracts/commons/IData";
-import IOutputCommon from "@/domain/useCases/contracts/commons/IOutput";
+import IEntity from "@/domain/useCases/contracts/user/IEntity";
+import IData from "@/domain/useCases/contracts/user/IData";
+import ICommonsOutput from "@/domain/useCases/contracts/commons/IOutput";
 
-export default interface IOutput extends IOutputCommon {
-  handle(user: IUser): Promise<IData | null>;
+export default interface IOutput extends ICommonsOutput {
+  handle(user: IEntity | null): Promise<IData>;
 }

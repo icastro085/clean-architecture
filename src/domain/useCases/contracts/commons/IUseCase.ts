@@ -1,6 +1,6 @@
 import IInput from "@/domain/useCases/contracts/commons/IInput";
-import IOutput from "@/domain/useCases/contracts/commons/IOutput";
+import IData from "@/domain/useCases/contracts/commons/IData";
 
 export default interface IUseCase {
-  handle(input: IInput): Promise<IOutput>;
+  handle(input: IInput): Promise<IData | void | null>;
 }

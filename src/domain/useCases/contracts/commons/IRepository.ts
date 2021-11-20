@@ -1,5 +1,5 @@
-import IData from "@/domain/useCases/contracts/commons/IData";
+import IEntity from "@/domain/entities/contracts/IEntity";
 
 export default interface IRepository {
-  handle(data?: IData): Promise<null | IData | IData[]>;
+  handle(data?: IEntity): Promise<null | IEntity | IEntity[]>;
 }
