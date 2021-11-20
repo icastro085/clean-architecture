@@ -1,6 +1,9 @@
-import IEntity from "@/domain/useCases/contracts/user/IEntity";
 import IRepository from "@/domain/useCases/contracts/commons/IRepository";
+import IEntity from "@/domain/useCases/contracts/user/IEntity";
 
-export default interface IRepositoryCreate extends IRepository {
-  handle(user: IEntity): Promise<IEntity | null>;
-}
+type IRepositoryCreate<
+  INEntity extends IEntity = IEntity,
+  OUTEntity extends IEntity = IEntity,
+> = IRepository<INEntity, OUTEntity>;
+
+export default IRepositoryCreate;

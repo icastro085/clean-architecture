@@ -3,12 +3,10 @@ import IData from "@/domain/useCases/contracts/user/IData";
 import IOutput from "@/domain/useCases/contracts/user/IOutput";
 
 export default class OutputCreate implements IOutput {
-  handle(user: IEntity | null): Promise<IData> {
-    if (!user) {
-      return Promise.resolve(null);
-    }
+  constructor(readonly entity: IEntity) {}
 
-    const { id = null, name = "" } = user;
+  handle(): Promise<IData> {
+    const { id = null, name = "" } = this.entity;
     return Promise.resolve({ id, name });
   }
 }

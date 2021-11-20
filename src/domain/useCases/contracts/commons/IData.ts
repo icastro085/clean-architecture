@@ -1,5 +1,3 @@
-import IEntity from "@/domain/entities/contracts/IEntity";
-
-type IData = IEntity;
+type IData = unknown;
 
 export default IData;

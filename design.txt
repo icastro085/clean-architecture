@@ -1,111 +1,158 @@
 Entities
   Contracts
-    IEntity{ id?: string }
-    IUser{ name: string } extend IEntity
+    IEntity{ id?: string }()
+    IUser{ name: string }() extend IEntity
 
 UseCases
   Contracts
     Commons
-      (IEntity from Entities/Contracts/IEntity)
-      IData() extend IEntity
+      IData() extend unknown
 
       (IEntity from Entities/Contracts/IEntity)
-      IInput()
+      IInput{entity: IEntity}()<IEntity>
         handle(): IEntity
 
       (IEntity from Entities/Contracts/IEntity)
-      IOutput()
-        handle(IEntity): null | Data | Data[]
-      
-      (IEntity from Entities/Contracts/IEntity)
-      IRepository()
-        handle(IEntity?): null | IEntity | IEntity[]
+      IOutput{entity: IEntity}()<IEntity, IData>
+        handle(): IData
 
-      IUseCase()
-        handle(IInput): null | IData | IData[]
+      (IEntity from Entities/Contracts/IEntity)
+      IRepository()<INEntity, OUTEntity>
+        handle(INEntity?): OUTEntity
+
+      (IEntity from Entities/Contracts/IEntity)
+      IUseCase{repository: IRepository<IEntity, IEntity>}()<IInput, IOutput>
+        handle(IInput): IOutput
 
     User
       (IUser from Entities/Contracts/IUser)
       IEntity() extend IUser
 
       (ICommonsData from UseCases/Contracts/Commons/IData)
-      IData() extend ICommonsData | null
+      IData() extend ICommonsData
 
       (ICommonsInput from UseCases/Contracts/Commons/IInput)
-      IInpput() extend ICommonsInput
-        handle(): IEntity
+      IInpput() extend ICommonsInput<IEntity>
 
       (ICommonsOutput from UseCases/Contracts/Commons/IOutput)
-      IOutput() extend ICommonsOutput
-        handle(): IData
+      IOutput() extend ICommonsOutput<IEntity, IData>
 
-      INotificationService
-        handle(IEntity): void
-
-      (ICommonsRepository from UseCases/Contracts/Commons/IRepository)
-      IRepositoryCreate extend ICommonsRepository
-        handle(IEntity): IEntity | null
+      (IRepository from UseCases/Contracts/Commons/IRepository)
+      IRepositoryCreate()
+        <INEntity = IEntity, OUTEntity = IEntity>
+          extend
+            IRepository<INEntity, OUTEntity>
 
       (ICommonsUseCase from UseCases/Contracts/Commons/UseCase)
-      IUseCaseCreate(IOutput, IRepositoryCreate) extend ICommonsUseCase
-        handle(IInpput): IData | null
-
-      (ICommonsUseCase from UseCases/Contracts/Commons/UseCase)
-      IUseCaseSendNotification(INotificationService) extend ICommonsUseCase
-        handle(IInpput): void
+      IUseCaseCreate() extend ICommonsUseCase<IInpput, IOutput>
 
   User
     (
-      Input from UseCases/Contracts/User/Input
-      Entity from UseCases/Contracts/User/Entity
+      IInpput from UseCases/Contracts/User/IInpput
+      IEntity from UseCases/Contracts/User/IEntity
     )
-    InputCreate(Entity) extend Input
-      handle(): Entity
+    InputCreate(entity: IEntity) extend IInpput
+      handle(): IEntity
 
     (
-      Input from UseCases/Contracts/User/Output
-      Entity from UseCases/Contracts/User/Entity
-      Data from UseCases/Contracts/User/Data
+      IOutput from UseCases/Contracts/User/IOutput
+      IEntity from UseCases/Contracts/User/IEntity
+      IData from UseCases/Contracts/User/IData
     )
-    OutputCreate(Entity) extend Output
-      handle(): Data | null
+    OutputCreate(entity: IEntity) extend IOutput
+      handle(): IData
 
     (
-      RepositoryCreate from UseCases/Contracts/User/RepositoryCreate
+      IRepository from UseCases/Contracts/Commons/IRepository
+      IEntity from UseCases/Contracts/User/IEntity
+      IInput from UseCases/Contracts/User/IInput
+      IOutput from UseCases/Contracts/User/IOutput
       IUseCaseCreate from UseCases/Contracts/User/UseCaseCreate
-      Data from UseCases/Contracts/User/Data
     )
-    UseCaseCreate(OutputCreate, RepositoryCreate) extend IUseCaseCreate
-      handle(UseCases/Contracts/User/Input): Data | null
+    UseCaseCreate(OutputCreate, IRepository<IEntity, IEntity>) extend IUseCaseCreate
+      handle(IInput): IOutput
 
 Controllers
   Web
     Contracts
-      HttpData extend UseCases/Contracts/Commons/Data
+        Commons
+          IHttpOutputData{status: number, data: any}()
 
-      HttpOutput
-        handle(): { status: number, data: null | HttpData | HttpData[] }
+          IHttpOutputError{status: number, messge: string}()
 
-      HttpResponse()
-        handle(HttpData): HttpOutput
-    
+          IHttpOutput()
+            handle(status: number, data: any): IHttpOutputData
+
+          IHttpOutputError()
+            handle(status: number, messge: string): IHttpOutputError
+
+          IController()
+            handle(any): IHttpOutputData | IHttpOutputError
+
+        User
+          (IUserEntity from UseCases/Contracts/User/IEntity)
+          IEntity() extend IUserEntity
+
+          (
+            ICommonsHttpOutputData from Controllers/Web/Contracts/Commons/IHttpOutputData,
+            IEntity from UseCases/Contracts/User/IEntity
+          )
+          IHttpOutpuData{data?: IEntity}() extend ICommonsHttpOutputData
+
+          (
+            ICommonsHttpOutput from Controllers/Web/Contracts/Commons/IHttpOutput
+            IEntity from UseCases/Contracts/User/IEntity
+          )
+          IHttpOutput() extend ICommonsHttpOutput
+            handle(status: number, data: IEntity): IHttpOutpuData
+
+          (ICommonsHttpOutputError from Controllers/Web/Contracts/Commons/IHttpOutputError)
+          IHttpOutputError() extend ICommonsHttpOutputError
+
+          (IRepositoryCreate from UseCases/Contracts/User/IRepositoryCreate)
+          IRepositoryCreate()
+            <INEntity = IEntity, OUTEntity = IEntity>
+              extend
+                IRepositoryCreate<INEntity, OUTEntity>
+
+          (
+            IUseCaseCreate from UseCases/Contracts/User/UseCaseCreate
+            ICommonsControllerfrom Controllers/Web/Contracts/Commons/IController
+          )
+          IController{
+            useCase: IUseCaseCreate,
+            repository: IRepositoryCreate
+          }() extend ICommonsController
+            handle(body: any): IHttpOutput | IHttpOutputError
+
     User
-      HttpData(UseCases/Contracts/Commons/Data) extend Controllers/Web/Contracts/HttpData
-
-      HttpOutput(UseCases/Contracts/Commons/Output) extend Controllers/Web/Contracts/HttpOutput
-        handle(): any
-
-      Controller(
-        UseCases/Contracts/User/UseCaseCreate,
-
+      (
+        IController from Controllers/Web/Contracts/User/IController
+        IRepositoryCreate from Controllers/Web/Contracts/User/IRepositoryCreate
       )
-        handle(): HttpOutput
-            
+      Controller(
+        useCase: IUseCaseCreate,
+        repository: IRepositoryCreate
+      ) extend IController
+
 Frameworks & Drives
-  UseRepositoryMySql: UseRepository
-  NotificationServiceEmail: NotificationService
+  Web
+    Restful
+      Contracts
+        Express
+          (IController from Controllers/Web/Contracts/Commons/IController)
+          Router{controller: IController}() extend ExpressRouter
+            handle(ExpressRequest, ExpressResponse): void
+
+  User
+    (IUserEntity from Controllers/Web/Contracts/User/IUserEntity)
+    IEntity extend IUserEntity
+
+    (IRepositoryCreate from Controllers/Web/Contracts/User/IRepositoryCreate)
+    RepositoryCreateMemory() extend IRepositoryCreate
+      handle(IEntity): IEntity
 
 Main
-  webAdapter = AdapterWeb(DbUseCaseRegistration(UseRepositoryMySql, NotificationServiceEmail))
-  UserPresenterJson(webAdapter) -> world
+  App()
+    handle(): void
 

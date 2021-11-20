@@ -1,5 +1,6 @@
 import ICommonsData from "@/domain/useCases/contracts/commons/IData";
 
-type IData = ICommonsData | null;
-
-export default IData;
+export default interface IData extends ICommonsData {
+  readonly id?: string | null;
+  readonly name: string;
+}
