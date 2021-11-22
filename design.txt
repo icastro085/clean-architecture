@@ -135,24 +135,33 @@ Applications
         (IControllerCreate from Applications/Controllers/Rest/Contracts/User/IControllerCreate)
         ControllerCreate(useCase: IUseCaseCreate) implements IControllerCreate
 
-Frameworks & Drives
-  Web
-    Rest
-      Contracts
-        Express
-          (IController from Controllers/Web/Contracts/Commons/IController)
-          Router{controller: IController}() extends ExpressRouter
-            handle(ExpressRequest, ExpressResponse): void
+Infrastructure(Frameworks & Drives)
+  Database
+    Memory()
+      create(tableName: string, data: unknown): unknown
+
+  Rest
+    Contracts
+      Express
+        (IController from Applications/Controllers/ExpressRequest/Contracts/Commons/IController)
+        IRouter{controller: IController}() extends ExpressRouter
+          handle(ExpressRequest, ExpressResponse): void
 
   User
-    (IUserEntity from Controllers/Web/Contracts/User/IUserEntity)
+    (IUserEntity from Controllers/Web/Contracts/User/IEntity)
     IEntity extends IUserEntity
 
-    (IRepositoryCreate from Controllers/Web/Contracts/User/IRepositoryCreate)
-    RepositoryCreateMemory() implements IRepositoryCreate
+    (
+      Memory = Infrastructure/Database/Memory
+      IRepositoryCreate from Controllers/Web/Contracts/User/IRepositoryCreate
+    )
+    RepositoryCreateMemory(database: Memory) implements IRepositoryCreate
       handle(IEntity): IEntity
 
+    (form Infrastructure/Rest/Contracts/Express/IRouter)
+    RestRouterExpressCreate implements IRouter
+
 Main
-  App()
+  AppExpress()
     handle(): void
 

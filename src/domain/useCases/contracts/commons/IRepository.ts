@@ -4,5 +4,5 @@ export default interface IRepository<
   INEntity extends IEntity = IEntity,
   OUTEntity extends IEntity = IEntity,
 > {
-  handle(entity?: INEntity): Promise<OUTEntity>;
+  handle(entity: INEntity): Promise<OUTEntity>;
 }

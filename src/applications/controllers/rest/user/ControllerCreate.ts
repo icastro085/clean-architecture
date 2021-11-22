@@ -29,7 +29,7 @@ export default class ControllerCreate implements IControllerCreate {
       const output: IOutput = await this.useCase.handle(input);
       const dataOutput: IData = await output.handle();
 
-      return this.httpOutput.handle(204, dataOutput);
+      return this.httpOutput.handle(201, dataOutput);
     } catch (e) {
       const error: Error = e as Error;
       return this.httpOutputError.handle(500, error.message);
