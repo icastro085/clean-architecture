@@ -1,12 +1,12 @@
 Entities
   Contracts
     IEntity{ id?: string }()
-    IUser{ name: string }() extend IEntity
+    IUser{ name: string }() extends IEntity
 
 UseCases
   Contracts
     Commons
-      IData() extend unknown
+      IData() extends unknown
 
       (IEntity from Entities/Contracts/IEntity)
       IInput{entity: IEntity}()<IEntity>
@@ -26,32 +26,32 @@ UseCases
 
     User
       (IUser from Entities/Contracts/IUser)
-      IEntity() extend IUser
+      IEntity() extends IUser
 
       (ICommonsData from UseCases/Contracts/Commons/IData)
-      IData() extend ICommonsData
+      IData() extends ICommonsData
 
       (ICommonsInput from UseCases/Contracts/Commons/IInput)
-      IInpput() extend ICommonsInput<IEntity>
+      IInpput() extends ICommonsInput<IEntity>
 
       (ICommonsOutput from UseCases/Contracts/Commons/IOutput)
-      IOutput() extend ICommonsOutput<IEntity, IData>
+      IOutput() extends ICommonsOutput<IEntity, IData>
 
       (IRepository from UseCases/Contracts/Commons/IRepository)
       IRepositoryCreate()
         <INEntity = IEntity, OUTEntity = IEntity>
-          extend
+          extends
             IRepository<INEntity, OUTEntity>
 
       (ICommonsUseCase from UseCases/Contracts/Commons/UseCase)
-      IUseCaseCreate() extend ICommonsUseCase<IInpput, IOutput>
+      IUseCaseCreate() extends ICommonsUseCase<IInpput, IOutput>
 
   User
     (
       IInpput from UseCases/Contracts/User/IInpput
       IEntity from UseCases/Contracts/User/IEntity
     )
-    InputCreate(entity: IEntity) extend IInpput
+    InputCreate(entity: IEntity) implements IInpput
       handle(): IEntity
 
     (
@@ -59,7 +59,7 @@ UseCases
       IEntity from UseCases/Contracts/User/IEntity
       IData from UseCases/Contracts/User/IData
     )
-    OutputCreate(entity: IEntity) extend IOutput
+    OutputCreate(entity: IEntity) implements IOutput
       handle(): IData
 
     (
@@ -69,87 +69,87 @@ UseCases
       IOutput from UseCases/Contracts/User/IOutput
       IUseCaseCreate from UseCases/Contracts/User/UseCaseCreate
     )
-    UseCaseCreate(OutputCreate, IRepository<IEntity, IEntity>) extend IUseCaseCreate
+    UseCaseCreate(OutputCreate, IRepository<IEntity, IEntity>) implements IUseCaseCreate
       handle(IInput): IOutput
 
-Controllers
-  Web
-    Contracts
-        Commons
-          IHttpOutputData{status: number, data: any}()
+Applications
+  Controllers
+    Rest
+      Contracts
+          Commons
+            IHttpOutputData{status: number, data: unknown}()
 
-          IHttpOutputError{status: number, messge: string}()
+            IHttpOutputDataError{status: number, messge: string}()
 
-          IHttpOutput()
-            handle(status: number, data: any): IHttpOutputData
+            IHttpOutput()
+              handle(status: number, data: unknown): IHttpOutputData
 
-          IHttpOutputError()
-            handle(status: number, messge: string): IHttpOutputError
+            IHttpOutputError()
+              handle(status: number, messge: string): IHttpOutputDataError
 
-          IController()
-            handle(any): IHttpOutputData | IHttpOutputError
+            (IUseCase from UseCases/Contracts/Commons/IUseCase)
+            IController{
+              useCase: IUseCase
+              httpOutput: IHttpOutput
+              httpOutputError: IHttpOutputError
+            }()
+              handle(unknown): IHttpOutputData | IHttpOutputDataError
 
-        User
-          (IUserEntity from UseCases/Contracts/User/IEntity)
-          IEntity() extend IUserEntity
+          User
+            (IUserEntity from UseCases/Contracts/User/IEntity)
+            IEntity() extends IUserEntity
 
-          (
-            ICommonsHttpOutputData from Controllers/Web/Contracts/Commons/IHttpOutputData,
-            IEntity from UseCases/Contracts/User/IEntity
-          )
-          IHttpOutpuData{data?: IEntity}() extend ICommonsHttpOutputData
+            (IUserData from UseCases/Contracts/User/IData)
+            IData() extends IUserData
 
-          (
-            ICommonsHttpOutput from Controllers/Web/Contracts/Commons/IHttpOutput
-            IEntity from UseCases/Contracts/User/IEntity
-          )
-          IHttpOutput() extend ICommonsHttpOutput
-            handle(status: number, data: IEntity): IHttpOutpuData
+            (ICommonsHttpOutput from Applications/Controllers/Rest/Contracts/Commons/IHttpOutput)
+            IHttpOutput() extends ICommonsHttpOutput<IData>
 
-          (ICommonsHttpOutputError from Controllers/Web/Contracts/Commons/IHttpOutputError)
-          IHttpOutputError() extend ICommonsHttpOutputError
+            (ICommonsHttpOutputError from Applications/Controllers/Rest/Contracts/Commons/IHttpOutputError)
+            IHttpOutputError() extends ICommonsHttpOutputError
 
-          (IRepositoryCreate from UseCases/Contracts/User/IRepositoryCreate)
-          IRepositoryCreate()
-            <INEntity = IEntity, OUTEntity = IEntity>
-              extend
-                IRepositoryCreate<INEntity, OUTEntity>
+            (IRepositoryCreate from UseCases/Contracts/User/IRepositoryCreate)
+            IRepositoryCreate() extends IRepositoryCreate<IEntity, IEntity>
 
-          (
-            IUseCaseCreate from UseCases/Contracts/User/UseCaseCreate
-            ICommonsControllerfrom Controllers/Web/Contracts/Commons/IController
-          )
-          IController{
-            useCase: IUseCaseCreate,
-            repository: IRepositoryCreate
-          }() extend ICommonsController
-            handle(body: any): IHttpOutput | IHttpOutputError
+            (
+              IUseCaseCreate from UseCases/Contracts/User/UseCaseCreate
+              ICommonsControllerfrom Applications/Controllers/Rest/Contracts/Commons/IController
+            )
+            IControllerCreate{
+              useCase: IUseCaseCreate
+              httpOutput: IHttpOutput
+              httpOutputError: IHttpOutputError
+            }() extends ICommonsController<IHttpOutputData<IData>>
 
-    User
-      (
-        IController from Controllers/Web/Contracts/User/IController
-        IRepositoryCreate from Controllers/Web/Contracts/User/IRepositoryCreate
-      )
-      Controller(
-        useCase: IUseCaseCreate,
-        repository: IRepositoryCreate
-      ) extend IController
+      User
+        (
+          IHttpOutput from Applications/Controllers/Rest/Contracts/User/IHttpOutput
+        )
+        HttpOutput implements IHttpOutput
+
+        (
+          IHttpOutputError from Applications/Controllers/Rest/Contracts/User/IHttpOutputError
+        )
+        HttpOutputError implements IHttpOutputError
+
+        (IControllerCreate from Applications/Controllers/Rest/Contracts/User/IControllerCreate)
+        ControllerCreate(useCase: IUseCaseCreate) implements IControllerCreate
 
 Frameworks & Drives
   Web
-    Restful
+    Rest
       Contracts
         Express
           (IController from Controllers/Web/Contracts/Commons/IController)
-          Router{controller: IController}() extend ExpressRouter
+          Router{controller: IController}() extends ExpressRouter
             handle(ExpressRequest, ExpressResponse): void
 
   User
     (IUserEntity from Controllers/Web/Contracts/User/IUserEntity)
-    IEntity extend IUserEntity
+    IEntity extends IUserEntity
 
     (IRepositoryCreate from Controllers/Web/Contracts/User/IRepositoryCreate)
-    RepositoryCreateMemory() extend IRepositoryCreate
+    RepositoryCreateMemory() implements IRepositoryCreate
       handle(IEntity): IEntity
 
 Main
