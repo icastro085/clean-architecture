@@ -1,9 +1,6 @@
-import IRepository from "@/domain/useCases/contracts/commons/IRepository";
 import IEntity from "@/domain/useCases/contracts/user/IEntity";
+import ICommonsRepository from "@/domain/useCases/contracts/commons/IRepository";
 
-type IRepositoryCreate<
-  INEntity extends IEntity = IEntity,
-  OUTEntity extends IEntity = IEntity,
-> = IRepository<INEntity, OUTEntity>;
-
-export default IRepositoryCreate;
+export default interface IRepository extends ICommonsRepository {
+  handle(entity: IEntity): Promise<IEntity>;
+}

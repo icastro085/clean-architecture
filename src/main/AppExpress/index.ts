@@ -1,28 +1,30 @@
-import express, { Application } from "express";
+import express, { Application, Router } from "express";
+
 import UserRouters from "@/main/AppExpress/UserRouters";
-import MemoryDatabase from "@/infrastructure/database/Memory";
+import MemoryDatabase from "@/infrastructure/database/memory/Memory";
 import RepositoryCreateMemory from "@/infrastructure/user/RepositoryCreateMemory";
 
 const PORT = 3001;
+const database = new MemoryDatabase();
 
 export default class AppExpress {
-  private buildUserRouters(app: Application): void {
-    const database = new MemoryDatabase();
+  private buildUserRouters(): Router {
     const repository = new RepositoryCreateMemory(database);
     const userRouters = new UserRouters(repository);
 
-    userRouters.handle(app);
+    return userRouters.handle();
   }
 
   async handle(): Promise<Application> {
     const app = express();
     app.use(express.json());
-    app.use(express.urlencoded());
 
-    this.buildUserRouters(app);
+    const userRouters = this.buildUserRouters();
+
+    app.use("/user", userRouters);
 
     app.listen(PORT, () => {
-      console.log(`Example app listening at http://localhost:${PORT}`);
+      console.log(`listening on port ${PORT}`);
     });
 
     return app;

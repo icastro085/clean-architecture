@@ -1,4 +1,4 @@
-import IUserEntity from "@/applications/controllers/rest/contracts/user/IEntity";
+import IUserEntity from "@/applications/controllers/contracts/user/IEntity";
 
 type IEntity = IUserEntity;
 

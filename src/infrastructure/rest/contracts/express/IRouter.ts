@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-import IController from "@/applications/controllers/rest/contracts/commons/IController";
+import IController from "@/applications/controllers/contracts/commons/IController";
 
 export default interface IRouter {
   readonly controller: IController;

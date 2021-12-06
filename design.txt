@@ -63,7 +63,7 @@ UseCases
       handle(): IData
 
     (
-      IRepository from UseCases/Contracts/Commons/IRepository
+      IRepositoryCreate from UseCases/Contracts/User/IRepositoryCreate
       IEntity from UseCases/Contracts/User/IEntity
       IInput from UseCases/Contracts/User/IInput
       IOutput from UseCases/Contracts/User/IOutput
